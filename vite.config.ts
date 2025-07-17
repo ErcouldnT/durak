@@ -5,4 +5,13 @@ import tailwindcss from "@tailwindcss/vite";
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [svelte(), tailwindcss()],
+  // server: {
+  //   host: true,
+  //   strictPort: true,
+  //   port: 5173,
+  //   hmr: {
+  //     protocol: "wss",
+  //     host: "modules-balanced-province-breathing.trycloudflare.com",
+  //   },
+  // },
 });

@@ -22,11 +22,11 @@ function createGameDeck() {
       const label = labels[i];
 
       const card = {
-        // id: // i wanna give every card unique id to use later
+        name: label + " of " + suit, // this is an unique identifier
         suit,
         label,
-        name: label + " of " + suit,
         value: findRealCardValue(label),
+        picture_url: "",
       };
 
       deck.push(card);
