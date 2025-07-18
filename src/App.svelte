@@ -45,10 +45,10 @@
               on:click={() => {
                 messages = [...messages, `You clicked on ${card.name}`];
               }}
-              class="relative flex hover:border-green-500 border-transparent border-2 cursor-pointer justify-center items-center w-[120px] h-[180px] p-2 rounded-lg transition-all duration-300"
+              class="relative flex hover:shadow-2xl cursor-pointer justify-center items-center w-[120px] h-[180px] p-2 rounded-lg transition-all duration-300 transform hover:scale-110 hover:rotate-3"
             >
               <img
-                class="absolute inset-0 w-full h-full object-cover rounded-lg shadow-2xl"
+                class="absolute inset-0 w-full h-full object-cover rounded-lg shadow-xl"
                 src={"/cards/" + card.name + ".jpg"}
                 alt={card.name}
               />
