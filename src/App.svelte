@@ -1,11 +1,25 @@
 <script lang="ts">
-  // console.log("Welcome!");
+  import { socket } from "./lib/socket";
 
-  let messages: string[] = [
-    "Welcome to the Durak game!",
-    "Your opponent is waiting for you.",
-    "You can start playing by clicking on your cards.",
-  ];
+  let chatInput: HTMLInputElement;
+
+  // Focus chat input on Enter key globally if not already focused
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && document.activeElement !== chatInput) {
+      e.preventDefault();
+      chatInput?.focus();
+    }
+  });
+
+  socket.on("connect", () => {
+    messages = [`You're connected: ${socket.id}`, ...messages];
+  });
+
+  socket.on("message", (msg: string) => {
+    messages = [`Opponent: ${msg}`, ...messages];
+  });
+
+  let messages: string[] = [];
 
   const yourHand = [
     { suit: "Clubs", label: "Ace", name: "Ace of Clubs", value: 14 },
@@ -13,6 +27,7 @@
     { suit: "Diamonds", label: "Queen", name: "Queen of Diamonds", value: 12 },
     { suit: "Spades", label: "Jack", name: "Jack of Spades", value: 11 },
     { suit: "Clubs", label: "10", name: "10 of Clubs", value: 10 },
+    { suit: "Clubs", label: "9", name: "9 of Clubs", value: 9 },
   ];
 
   const initialGame = {
@@ -64,7 +79,7 @@
     class="bg-black/70 w-1/4 rounded-tl-2xl absolute bottom-0 right-0 text-white h-64 flex flex-col"
   >
     <div class="flex-1 overflow-y-auto p-2">
-      {#each messages.reverse() as msg}
+      {#each messages as msg}
         <p class="text-sm">{msg}</p>
       {/each}
     </div>
@@ -72,10 +87,13 @@
       type="text"
       class="bg-gray-800/70 text-white text-sm p-2 outline-none"
       placeholder="Send a message..."
+      bind:this={chatInput}
       on:keydown={(e) => {
         const input = e.target as HTMLInputElement;
         if (e.key === "Enter" && input.value.trim() !== "") {
-          messages = [...messages, input.value.trim()];
+          const message = input.value.trim();
+          messages = [message, ...messages];
+          socket.emit("message", message);
           input.value = "";
         }
       }}
