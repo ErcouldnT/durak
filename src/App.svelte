@@ -2,6 +2,8 @@
   import { socket } from "./lib/socket";
 
   let chatInput: HTMLInputElement;
+  let yourSocketId: string | undefined;
+  let yourHand = [];
 
   // Focus chat input on Enter key globally if not already focused
   window.addEventListener("keydown", (e) => {
@@ -13,29 +15,31 @@
 
   socket.on("connect", () => {
     messages = [`You're connected: ${socket.id}`, ...messages];
+    yourSocketId = socket.id;
   });
 
   socket.on("message", (msg: string) => {
-    messages = [`Opponent: ${msg}`, ...messages];
+    messages = [`${msg}`, ...messages];
   });
 
-  let messages: string[] = [];
+  socket.on("gameState", (gameState: any) => {
+    initialGame = gameState;
+    messages = [`Game is started.`, ...messages];
+    yourHand = [
+      ...(gameState.players.find((p: any) => p.id === yourSocketId)?.cards ||
+        []),
+    ];
+  });
 
-  const yourHand = [
-    { suit: "Clubs", label: "Ace", name: "Ace of Clubs", value: 14 },
-    { suit: "Hearts", label: "King", name: "King of Hearts", value: 13 },
-    { suit: "Diamonds", label: "Queen", name: "Queen of Diamonds", value: 12 },
-    { suit: "Spades", label: "Jack", name: "Jack of Spades", value: 11 },
-    { suit: "Clubs", label: "10", name: "10 of Clubs", value: 10 },
-    { suit: "Clubs", label: "9", name: "9 of Clubs", value: 9 },
-  ];
+  let messages: string[] = ["Waiting for players to join..."];
 
-  const initialGame = {
-    state: "GAME_STARTED",
+  let initialGame = {
+    state: "WELCOME_SCREEN",
     turn: 0,
     currentPlayerId: 0,
     players: [],
-    totalCardCountInMiddle: 0,
+    deck: [],
+    strongestCard: {},
   };
 </script>
 
