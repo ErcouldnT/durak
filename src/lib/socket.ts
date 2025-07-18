@@ -1,6 +1,11 @@
 import { io } from "socket.io-client";
 
-export const socket = io("wss://durak.erkut.dev", {
+const socketUrl =
+  process.env.NODE_ENV === "development"
+    ? "ws://localhost:3000"
+    : "wss://durak.erkut.dev";
+
+export const socket = io(socketUrl, {
   transports: ["websocket"],
   // autoConnect: false,
   // reconnectionAttempts: 5,
