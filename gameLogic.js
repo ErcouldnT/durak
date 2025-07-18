@@ -1,131 +1,152 @@
-const players = [];
+class Durak {
+  static MAX_PLAYERS = 2;
 
-function addPlayer(player) {
-  if (players.length > 6) return; // no players more than 6
-  players.push(player);
-}
-
-function removePlayer(player) {
-  const index = players.indexOf(player);
-  if (index !== -1) {
-    players.splice(index, 1);
+  constructor() {
+    this.players = new Map();
+    this.deck = [];
+    this.turn = 0;
+    this.state = "WAITING_FOR_PLAYERS";
+    this.currentPlayerId = null;
+    this.strongestCard = null;
   }
-}
-function createGameDeck() {
-  const deck = [];
-  const suits = ["Hearts", "Clubs", "Diamonds", "Spades"];
-  const labels = ["6", "7", "8", "9", "10", "Jack", "Queen", "King", "Ace"];
 
-  for (let i = 0; i < suits.length; i++) {
-    const suit = suits[i];
-    for (let i = 0; i < labels.length; i++) {
-      const label = labels[i];
+  getGame() {
+    return {
+      turn: this.turn,
+      state: this.state,
+      currentPlayerId: this.currentPlayerId,
+      players: Array.from(this.players.values()),
+      deck: this.deck,
+      strongestCard: this.strongestCard,
+    };
+  }
 
-      const card = {
-        name: label + " of " + suit, // this is an unique identifier
+  createGameDeck() {
+    // reset deck
+    this.deck.length = 0;
+
+    const suits = ["Hearts", "Clubs", "Diamonds", "Spades"];
+    const labels = ["6", "7", "8", "9", "10", "Jack", "Queen", "King", "Ace"];
+
+    // create the deck
+    this.deck = suits.flatMap((suit) =>
+      labels.map((label) => ({
+        name: `${label} of ${suit}`,
         suit,
         label,
-        value: findRealCardValue(label),
-        picture_url: "",
-      };
+        value: this.findRealCardValue(label),
+        image: `/cards/${encodeURIComponent(`${label} of ${suit}`)}.jpg`,
+      }))
+    );
 
-      deck.push(card);
+    // shuffle the deck
+    this.shuffleDeck();
+  }
+
+  findRealCardValue(label) {
+    switch (label) {
+      case "Jack":
+        return 11;
+      case "Queen":
+        return 12;
+      case "King":
+        return 13;
+      case "Ace":
+        return 14;
+      default:
+        return Number(label);
     }
   }
-  return deck;
-}
 
-function findRealCardValue(label) {
-  switch (label) {
-    case "Jack":
-      return 11;
-    case "Queen":
-      return 12;
-    case "King":
-      return 13;
-    case "Ace":
-      return 14;
-
-    default:
-      return Number(label);
+  shuffleDeck() {
+    for (let i = this.deck.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [this.deck[i], this.deck[j]] = [this.deck[j], this.deck[i]];
+    }
   }
-}
 
-function shuffleDeck(deck) {
-  for (let i = deck.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [deck[i], deck[j]] = [deck[j], deck[i]];
-  }
-  return deck;
-}
-
-function giveSixCardsToEveryPlayers(deck) {
-  for (let i = 0; i < players.length; i++) {
-    const player = players[i];
-
-    player.cards = [
-      deck.pop(),
-      deck.pop(),
-      deck.pop(),
-      deck.pop(),
-      deck.pop(),
-      deck.pop(),
-    ];
-  }
-}
-
-function lookAtPlayersHandForValue(value, strongestCard) {
-  for (let i = 0; i < players.length; i++) {
-    const player = players[i];
-    const playerHand = player.cards;
-
-    // check if player has cards with strongest suit
-    for (let i = 0; i < playerHand.length; i++) {
-      const card = playerHand[i];
-
-      // if player has the strongest suit card with value of xx
-      if (card.suit === strongestCard.suit && card.value === value) {
-        return player;
+  lookAtPlayersHandForValue(value, strongestCard) {
+    for (const player of this.players.values()) {
+      for (const card of player.hand) {
+        if (card.suit === strongestCard.suit && card.value === value) {
+          return player;
+        }
       }
     }
+    return null;
   }
-  // if no one has the strongest suit of that value
-  return null;
+
+  findFirstPlayer(strongestCard) {
+    for (let val = 6; val <= 14; val++) {
+      const player = this.lookAtPlayersHandForValue(val, strongestCard);
+      // if a player has the card with the same suit and value, return him
+      if (player) return player;
+    }
+    // if no player has the card, return the first player
+    return this.players.values().next().value;
+  }
+
+  giveSixCardsToPlayers() {
+    for (const player of this.players.values()) {
+      // take the last 6 cards from the deck
+      player.hand = this.deck.splice(-6);
+    }
+  }
+
+  addPlayer(player) {
+    // max 2 players allowed
+    if (this.players.size >= Durak.MAX_PLAYERS) return;
+
+    // add to players
+    this.players.set(player.id, player);
+
+    return this.getGame();
+  }
+
+  removePlayer(player) {
+    this.players.delete(player.id);
+
+    // if the game is started, reset the game
+    if (this.state === "GAME_STARTED") {
+      this.resetGame();
+    }
+
+    return this.getGame();
+  }
+
+  startGame() {
+    // if the game is not in the waiting state or there are not exactly 2 players, do nothing
+    if (
+      this.state !== "WAITING_FOR_PLAYERS" ||
+      this.players.size !== Durak.MAX_PLAYERS
+    )
+      return;
+
+    this.createGameDeck();
+    this.giveSixCardsToPlayers();
+    this.strongestCard = this.deck[0]; // choose the first card as the strongest card (:
+    this.currentPlayerId = this.findFirstPlayer(this.strongestCard).id;
+    this.state = "GAME_STARTED";
+    this.turn = 1;
+
+    return this.getGame();
+  }
+
+  resetGame() {
+    // reset game state
+    this.state = "WAITING_FOR_PLAYERS";
+    this.turn = 0;
+    this.currentPlayerId = null;
+    this.strongestCard = null;
+
+    // reset players' hands
+    for (const player of this.players.values()) {
+      player.hand = [];
+    }
+
+    // reset deck
+    this.deck.length = 0;
+  }
 }
 
-function findFirstPlayer(strongestCard) {
-  if (lookAtPlayersHandForValue(6, strongestCard))
-    return lookAtPlayersHandForValue(6, strongestCard);
-  if (lookAtPlayersHandForValue(7, strongestCard))
-    return lookAtPlayersHandForValue(7, strongestCard);
-  if (lookAtPlayersHandForValue(8, strongestCard))
-    return lookAtPlayersHandForValue(8, strongestCard);
-  if (lookAtPlayersHandForValue(9, strongestCard))
-    return lookAtPlayersHandForValue(9, strongestCard);
-  if (lookAtPlayersHandForValue(10, strongestCard))
-    return lookAtPlayersHandForValue(10, strongestCard);
-  if (lookAtPlayersHandForValue(11, strongestCard))
-    return lookAtPlayersHandForValue(11, strongestCard);
-  if (lookAtPlayersHandForValue(12, strongestCard))
-    return lookAtPlayersHandForValue(12, strongestCard);
-  if (lookAtPlayersHandForValue(13, strongestCard))
-    return lookAtPlayersHandForValue(13, strongestCard);
-  if (lookAtPlayersHandForValue(14, strongestCard))
-    return lookAtPlayersHandForValue(14, strongestCard);
-
-  // if no one has the strongest suit, return first player
-  return players[0];
-}
-
-function startGame() {
-  const deck = createGameDeck();
-  const shuffledDeck = shuffleDeck(deck);
-
-  giveSixCardsToEveryPlayers(shuffledDeck);
-
-  // first card in the deck is the strongest
-  // const strongestSuit = strongestCard.suit; // "Hearts", "Clubs", "Diamonds" or "Spades"
-  const strongestCard = shuffledDeck[0];
-
-  const firstPlayer = findFirstPlayer(strongestCard);
-}
+export default Durak;
