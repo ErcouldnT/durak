@@ -62,7 +62,7 @@
           {#each yourHand as card}
             <button
               on:click={() => {
-                messages = [...messages, `You clicked on ${card.name}`];
+                messages = [`You clicked on ${card.name}`, ...messages];
               }}
               class="relative flex hover:shadow-2xl cursor-pointer justify-center items-center w-[120px] h-[180px] p-2 rounded-lg transition-all duration-300 transform hover:scale-110 hover:rotate-3"
             >
