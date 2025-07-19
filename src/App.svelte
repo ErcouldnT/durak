@@ -6,6 +6,7 @@
   let nameInput: HTMLInputElement;
   let yourSocketId: string | undefined;
   let yourName = "";
+  let yourHand = [];
   let messages: string[] = ["Waiting for players to join..."];
   let game = {
     state: "WAITING_FOR_YOUR_NAME",
