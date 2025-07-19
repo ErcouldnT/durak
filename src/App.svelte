@@ -1,20 +1,39 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import { socket } from "./lib/socket";
 
   let chatInput: HTMLInputElement;
+  let nameInput: HTMLInputElement;
   let yourSocketId: string | undefined;
-  let yourHand = [];
+  let yourName = "";
+  let messages: string[] = ["Waiting for players to join..."];
+  let game = {
+    state: "WAITING_FOR_YOUR_NAME",
+    turn: 0,
+    currentPlayerId: 0,
+    players: [],
+    deck: [],
+    strongestCard: {},
+  };
 
-  // Focus chat input on Enter key globally if not already focused
-  window.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" && document.activeElement !== chatInput) {
-      e.preventDefault();
-      chatInput?.focus();
-    }
+  $: yourHand = [
+    ...(game.players.find((p: any) => p.id === yourSocketId)?.hand || []),
+  ];
+
+  onMount(() => {
+    // Focus name input automatically when the page loads
+    nameInput?.focus();
+
+    // Focus chat input on Enter key globally if not already focused
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && document.activeElement !== chatInput) {
+        e.preventDefault();
+        chatInput?.focus();
+      }
+    });
   });
 
   socket.on("connect", () => {
-    messages = [`You're connected: ${socket.id}`, ...messages];
     yourSocketId = socket.id;
   });
 
@@ -23,34 +42,53 @@
   });
 
   socket.on("gameState", (gameState: any) => {
-    initialGame = gameState;
-    messages = [`Game is started.`, ...messages];
-    yourHand = [
-      ...(gameState.players.find((p: any) => p.id === yourSocketId)?.cards ||
-        []),
-    ];
+    game = gameState;
   });
-
-  let messages: string[] = ["Waiting for players to join..."];
-
-  let initialGame = {
-    state: "WELCOME_SCREEN",
-    turn: 0,
-    currentPlayerId: 0,
-    players: [],
-    deck: [],
-    strongestCard: {},
-  };
 </script>
 
 <main
   class="relative bg-gradient-to-br text-amber-200 from-yellow-400 via-amber-500 to-orange-400 h-screen w-screen flex flex-col justify-center items-center"
 >
-  {#if initialGame.state === "WELCOME_SCREEN"}
+  {#if game.state === "WAITING_FOR_YOUR_NAME"}
     <h1 class="font-bold text-9xl text-shadow-lg">Durak</h1>
+    {#if yourSocketId}
+      <p class="text-sm mt-2">Your socket ID</p>
+      <p class="text-sm">{yourSocketId}</p>
+    {/if}
+    <div class="p-10">
+      <!-- <h2 class="text-3xl">Waiting for players to join...</h2> -->
+      <div class="flex flex-col space-y-2">
+        <input
+          bind:this={nameInput}
+          type="text"
+          placeholder="Enter your name"
+          bind:value={yourName}
+          class="p-2 rounded-lg bg-gray-800/70 text-white outline-none"
+          on:keydown={(e) => {
+            if (e.key === "Enter" && yourName.trim() !== "") {
+              socket.emit("joinGame", yourName);
+              messages = [`You joined the game as ${yourName}.`, ...messages];
+              // yourName = "";
+            }
+          }}
+        />
+        <button
+          on:click={() => {
+            if (yourName.trim() !== "") {
+              socket.emit("joinGame", yourName);
+              messages = [`You joined the game as ${yourName}.`, ...messages];
+              // yourName = "";
+            }
+          }}
+          class="cursor-pointer bg-orange-500 hover:bg-orange-600 text-white p-2 rounded-lg transition-all duration-300"
+        >
+          Join Game
+        </button>
+      </div>
+    </div>
   {/if}
 
-  {#if initialGame.state === "GAME_STARTED"}
+  {#if game.state === "GAME_STARTED"}
     <div class="p-10 flex flex-col justify-center items-center">
       <div class="bg-green-500 p-5 rounded-2xl">
         <h1 class="text-white">Game is started</h1>
@@ -79,28 +117,30 @@
     </div>
   {/if}
 
-  <div
-    class="bg-black/70 w-1/4 rounded-tl-2xl absolute bottom-0 right-0 text-white h-64 flex flex-col"
-  >
-    <div class="flex-1 overflow-y-auto p-2">
-      {#each messages as msg}
-        <p class="text-sm">{msg}</p>
-      {/each}
+  {#if game.state !== "WAITING_FOR_YOUR_NAME"}
+    <div
+      class="bg-black/70 w-1/4 rounded-tl-2xl absolute bottom-0 right-0 text-white h-64 flex flex-col"
+    >
+      <div class="flex-1 overflow-y-auto p-2">
+        {#each messages as msg}
+          <p class="text-sm">{msg}</p>
+        {/each}
+      </div>
+      <input
+        type="text"
+        class="bg-gray-800/70 text-white text-sm p-2 outline-none"
+        placeholder="Send a message..."
+        bind:this={chatInput}
+        on:keydown={(e) => {
+          const input = e.target as HTMLInputElement;
+          if (e.key === "Enter" && input.value.trim() !== "") {
+            const message = input.value.trim();
+            messages = [message, ...messages];
+            socket.emit("message", message);
+            input.value = "";
+          }
+        }}
+      />
     </div>
-    <input
-      type="text"
-      class="bg-gray-800/70 text-white text-sm p-2 outline-none"
-      placeholder="Send a message..."
-      bind:this={chatInput}
-      on:keydown={(e) => {
-        const input = e.target as HTMLInputElement;
-        if (e.key === "Enter" && input.value.trim() !== "") {
-          const message = input.value.trim();
-          messages = [message, ...messages];
-          socket.emit("message", message);
-          input.value = "";
-        }
-      }}
-    />
-  </div>
+  {/if}
 </main>
