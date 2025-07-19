@@ -34,17 +34,21 @@
     });
   });
 
-  socket.on("connect", () => {
-    yourSocketId = socket.id;
-  });
+  function setupSocket() {
+    socket.connect();
 
-  socket.on("message", (msg: string) => {
-    messages = [`${msg}`, ...messages];
-  });
+    socket.on("connect", () => {
+      yourSocketId = socket.id;
+    });
 
-  socket.on("gameState", (gameState: any) => {
-    game = gameState;
-  });
+    socket.on("message", (msg: string) => {
+      messages = [`${msg}`, ...messages];
+    });
+
+    socket.on("gameState", (gameState: any) => {
+      game = gameState;
+    });
+  }
 </script>
 
 <main
@@ -67,6 +71,7 @@
           class="p-2 rounded-lg bg-gray-800/70 text-white outline-none"
           on:keydown={(e) => {
             if (e.key === "Enter" && yourName.trim() !== "") {
+              setupSocket();
               socket.emit("joinGame", yourName);
               messages = [`You joined the game as ${yourName}.`, ...messages];
               // yourName = "";
@@ -76,6 +81,7 @@
         <button
           on:click={() => {
             if (yourName.trim() !== "") {
+              setupSocket();
               socket.emit("joinGame", yourName);
               messages = [`You joined the game as ${yourName}.`, ...messages];
               // yourName = "";
@@ -85,6 +91,21 @@
         >
           Join Game
         </button>
+      </div>
+    </div>
+  {/if}
+
+  {#if game.state === "WAITING_FOR_PLAYERS"}
+    <div class="p-10 flex flex-col justify-center items-center">
+      <h2 class="text-3xl">
+        Waiting for players to join ({game.players.length}/2)
+      </h2>
+      <div class="mt-4">
+        {#each game.players as player}
+          <p class="text-xl">
+            {player.name} <span class="text-xs">{player.id}</span>
+          </p>
+        {/each}
       </div>
     </div>
   {/if}

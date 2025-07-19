@@ -32,7 +32,7 @@ io.on("connection", (socket) => {
     player.name = name;
     const gameState = game.addPlayer(player);
     socket.broadcast.emit("message", `${player.name} has joined the game.`);
-    socket.emit("gameState", gameState);
+    io.emit("gameState", gameState);
   });
 
   socket.on("message", (msg) => {
@@ -42,7 +42,7 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     const gameState = game.removePlayer(player);
     socket.broadcast.emit("message", `${player.name} has left the game.`);
-    socket.emit("gameState", gameState);
+    io.emit("gameState", gameState);
   });
 });
 
