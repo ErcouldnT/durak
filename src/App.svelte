@@ -111,13 +111,22 @@
   {/if}
 
   {#if game.state === "GAME_STARTED"}
-    <div class="p-10 flex flex-col justify-center items-center">
-      <div class="bg-green-500 p-5 rounded-2xl">
-        <h1 class="text-white">Game is started</h1>
+    <div class="flex flex-col justify-center items-center rounded-2xl">
+      <div class="mb-5">
+        <p class="text-center mb-2">Opponent hand</p>
+        <hand class="flex space-x-5 space-y-2">
+          <Card />
+          <Card />
+          <Card />
+          <Card />
+          <Card />
+          <Card />
+        </hand>
       </div>
-      <div class="p-10">Opponent hand</div>
-      <div class="p-10">Middle deck</div>
-      <div class="p-10 rounded-2xl">
+      <div class="p-10">
+        <Card />
+      </div>
+      <div class="mt-5">
         <hand class="flex space-x-5 space-y-2">
           {#each yourHand as card}
             <Card {card} />

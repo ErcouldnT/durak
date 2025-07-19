@@ -1,20 +1,35 @@
 <script lang="ts">
+  import Card from "./Card.svelte";
   import { messages } from "../stores/messages";
 
-  export let card;
+  export let card = null;
+  export let backSide = false;
 
   function onClick() {
+    // todo: send card information to server
     $messages = [`You clicked on ${card.name}.`, ...$messages];
   }
 </script>
 
-<button
-  on:click={onClick}
-  class="relative flex hover:shadow-2xl cursor-pointer justify-center items-center w-[120px] h-[180px] p-2 rounded-lg transition-all duration-300 transform hover:scale-110 hover:rotate-3"
->
-  <img
-    class="absolute inset-0 w-full h-full object-cover rounded-lg shadow-xl"
-    src={"/cards/" + card.name + ".jpg"}
-    alt={card.name}
-  />
-</button>
+{#if card}
+  <button
+    on:click={onClick}
+    class="relative flex hover:shadow-2xl cursor-pointer justify-center items-center w-[120px] h-[180px] p-2 rounded-lg transition-all duration-300 transform hover:scale-110 hover:rotate-3"
+  >
+    <img
+      class="absolute inset-0 w-full h-full object-cover rounded-lg shadow-xl"
+      src={!backSide ? card.image : "/cards/back.jpg"}
+      alt={card.name}
+    />
+  </button>
+{:else}
+  <card
+    class="relative flex justify-center items-center w-[120px] h-[180px] p-2 rounded-lg transition-all duration-300 transform"
+  >
+    <img
+      class="absolute inset-0 w-full h-full object-cover rounded-lg shadow-xl"
+      src={"/cards/back.jpg"}
+      alt={"Back side of a card"}
+    />
+  </card>
+{/if}
