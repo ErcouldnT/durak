@@ -95,10 +95,15 @@ class Durak {
 
   addPlayer(player) {
     // max 2 players allowed
-    // if (this.players.size >= Durak.MAX_PLAYERS) return;
+    if (this.players.size >= Durak.MAX_PLAYERS) return;
 
     // add to players
     this.players.set(player.id, player);
+
+    if (this.players.size === Durak.MAX_PLAYERS) {
+      // if the game is ready to start, start the game
+      this.startGame();
+    }
 
     return this.getGame();
   }

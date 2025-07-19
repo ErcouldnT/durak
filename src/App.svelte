@@ -7,7 +7,7 @@
   let yourSocketId: string | undefined;
   let yourName = "";
   let yourHand = [];
-  let messages: string[] = ["Waiting for players to join..."];
+  let messages: string[] = ["Welcome to Durak!"];
   let game = {
     state: "WAITING_FOR_YOUR_NAME",
     turn: 0,
@@ -122,7 +122,7 @@
           {#each yourHand as card}
             <button
               on:click={() => {
-                messages = [`You clicked on ${card.name}`, ...messages];
+                messages = [`You clicked on ${card.name}.`, ...messages];
               }}
               class="relative flex hover:shadow-2xl cursor-pointer justify-center items-center w-[120px] h-[180px] p-2 rounded-lg transition-all duration-300 transform hover:scale-110 hover:rotate-3"
             >

@@ -25,6 +25,7 @@ const game = new Durak();
 io.on("connection", (socket) => {
   const player = {
     id: socket.id,
+    // isReady: false,
   };
 
   socket.on("joinGame", (name) => {
