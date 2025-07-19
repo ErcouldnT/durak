@@ -1,13 +1,15 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { socket } from "./lib/socket";
+  import { messages } from "./stores/messages";
+
+  import Card from "./components/Card.svelte";
 
   let chatInput: HTMLInputElement;
   let nameInput: HTMLInputElement;
   let yourSocketId: string | undefined;
   let yourName = "";
   let yourHand = [];
-  let messages: string[] = ["Welcome to Durak!"];
   let game = {
     state: "WAITING_FOR_YOUR_NAME",
     turn: 0,
@@ -22,10 +24,10 @@
   ];
 
   onMount(() => {
-    // Focus name input automatically when the page loads
+    // focus name input automatically when the page loads
     nameInput?.focus();
 
-    // Focus chat input on Enter key globally if not already focused
+    // focus chat input automatically if you press Enter
     window.addEventListener("keydown", (e) => {
       if (e.key === "Enter" && document.activeElement !== chatInput) {
         e.preventDefault();
@@ -42,7 +44,7 @@
     });
 
     socket.on("message", (msg: string) => {
-      messages = [`${msg}`, ...messages];
+      $messages = [`${msg}`, ...$messages];
     });
 
     socket.on("gameState", (gameState: any) => {
@@ -73,8 +75,7 @@
             if (e.key === "Enter" && yourName.trim() !== "") {
               setupSocket();
               socket.emit("joinGame", yourName);
-              messages = [`You joined the game as ${yourName}.`, ...messages];
-              // yourName = "";
+              $messages = [`You joined the game as ${yourName}.`, ...$messages];
             }
           }}
         />
@@ -83,8 +84,7 @@
             if (yourName.trim() !== "") {
               setupSocket();
               socket.emit("joinGame", yourName);
-              messages = [`You joined the game as ${yourName}.`, ...messages];
-              // yourName = "";
+              $messages = [`You joined the game as ${yourName}.`, ...$messages];
             }
           }}
           class="cursor-pointer bg-orange-500 hover:bg-orange-600 text-white p-2 rounded-lg transition-all duration-300"
@@ -118,22 +118,11 @@
       <div class="p-10">Opponent hand</div>
       <div class="p-10">Middle deck</div>
       <div class="p-10 rounded-2xl">
-        <div class="flex space-x-5 space-y-2">
+        <hand class="flex space-x-5 space-y-2">
           {#each yourHand as card}
-            <button
-              on:click={() => {
-                messages = [`You clicked on ${card.name}.`, ...messages];
-              }}
-              class="relative flex hover:shadow-2xl cursor-pointer justify-center items-center w-[120px] h-[180px] p-2 rounded-lg transition-all duration-300 transform hover:scale-110 hover:rotate-3"
-            >
-              <img
-                class="absolute inset-0 w-full h-full object-cover rounded-lg shadow-xl"
-                src={"/cards/" + card.name + ".jpg"}
-                alt={card.name}
-              />
-            </button>
+            <Card {card} />
           {/each}
-        </div>
+        </hand>
         <p class="text-center">Your hand</p>
       </div>
     </div>
@@ -144,7 +133,7 @@
       class="bg-black/70 w-1/4 rounded-tl-2xl absolute bottom-0 right-0 text-white h-64 flex flex-col"
     >
       <div class="flex-1 overflow-y-auto p-2">
-        {#each messages as msg}
+        {#each $messages as msg}
           <p class="text-sm">{msg}</p>
         {/each}
       </div>
@@ -157,7 +146,7 @@
           const input = e.target as HTMLInputElement;
           if (e.key === "Enter" && input.value.trim() !== "") {
             const message = input.value.trim();
-            messages = [message, ...messages];
+            $messages = [message, ...$messages];
             socket.emit("message", message);
             input.value = "";
           }
