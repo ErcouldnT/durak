@@ -36,6 +36,18 @@ class Durak {
     return null;
   }
 
+  putCardOnTable(playerId, card) {
+    const player = this.players.get(playerId);
+    // console.log(`Player ${player.name} put ${card.name} on the table.`);
+    // if (!player || !player.hand.includes(card)) return null;
+    player.hand = player.hand.filter((c) => c.name !== card.name);
+    this.tableCards.push(card);
+    // this.playedCards.push(card);
+    // this.turn++;
+    // this.currentPlayerId = this.findNextPlayer(playerId);
+    return this.getGame();
+  }
+
   createGameDeck() {
     // reset deck
     this.deck.length = 0;
@@ -148,6 +160,8 @@ class Durak {
     this.currentPlayerId = this.findFirstPlayer(this.strongestCard).id;
     this.state = "GAME_STARTED";
     this.turn = 1;
+    this.tableCards = [];
+    this.playedCards = [];
 
     return this.getGame();
   }

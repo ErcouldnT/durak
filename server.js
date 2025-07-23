@@ -52,6 +52,21 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("putCardOnTable", ({ playerId, card }) => {
+    // console.log(
+    //   `Player ${playerId} is putting card ${card.name} on the table.`
+    // );
+    if (game.state !== "GAME_STARTED" || game.currentPlayerId !== playerId)
+      return;
+    const gameState = game.putCardOnTable(playerId, card);
+    if (gameState) {
+      io.emit("gameState", gameState);
+      socket.emit("message", `You put ${card.name} on the table.`);
+    } else {
+      socket.emit("message", "You cannot put that card on the table.");
+    }
+  });
+
   socket.on("disconnect", () => {
     const gameState = game.removePlayer(player);
     socket.broadcast.emit("message", `${player.name} has left the game.`);

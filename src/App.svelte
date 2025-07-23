@@ -67,6 +67,12 @@
     socket.emit("getNewCard", yourSocketId);
     // $messages = [`You drew a new card.`, ...$messages];
   }
+
+  function putCardOnTable(card) {
+    if (!yourTurn || game.state !== "GAME_STARTED") return;
+    socket.emit("putCardOnTable", { playerId: yourSocketId, card });
+    // $messages = [`You put ${card.name} on the table.`, ...$messages];
+  }
 </script>
 
 <main
@@ -136,7 +142,9 @@
           {/each}
         </hand>
       </div>
-      <div class="flex w-full flex-row justify-between items-center p-5">
+      <div
+        class="flex w-full space-x-4 flex-row justify-between items-center p-5"
+      >
         <div class="p-4 rounded-xl border-dotted border-4">
           <div class="flex space-x-2 min-w-[120px] min-h-[180px]">
             {#each game.playedCards as card}
@@ -146,7 +154,7 @@
           <p class="text-center">Played cards</p>
         </div>
         <div class="p-4 rounded-xl border-dotted border-4">
-          <div class="flex space-x-2 w-[120px] h-[180px]">
+          <div class="flex space-x-2 min-w-[120px] min-h-[180px]">
             {#each game.tableCards as card}
               <Card {card} isPlayable={false} />
             {/each}
@@ -165,13 +173,13 @@
                 <Card {card} />
               </div>
             {/each} -->
-            <div on:click={getNewCard} class="absolute top-0 left-0 z-10">
+            <button on:click={getNewCard} class="absolute top-0 left-0 z-10">
               <Card
                 card={game.deck[game.deck.length - 1]}
                 isPlayable={yourTurn}
               />
-            </div>
-            <div class="absolute top-0 left-0 bottom-10 right-10 rotate-90">
+            </button>
+            <div class="absolute top-0 left-10 rotate-90">
               <Card card={game.strongestCard} isPlayable={false} />
             </div>
           </div>
@@ -181,7 +189,9 @@
       <div class="mt-5">
         <hand class="flex space-x-5 space-y-2">
           {#each yourHand as card}
-            <Card {card} />
+            <button on:click={() => putCardOnTable(card)}>
+              <Card {card} />
+            </button>
           {/each}
         </hand>
         <p class="text-center">Your hand</p>
