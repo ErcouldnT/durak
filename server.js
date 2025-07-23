@@ -67,6 +67,17 @@ io.on("connection", (socket) => {
     }
   });
 
+  socket.on("endTurn", (playerId) => {
+    if (game.state !== "GAME_STARTED" || game.currentPlayerId !== playerId)
+      return;
+    const nextPlayerId = game.findNextPlayer(playerId);
+    io.emit("gameState", game.getGame());
+    socket.emit(
+      "message",
+      `You ended your turn. It's now ${nextPlayerId}'s turn.`
+    );
+  });
+
   socket.on("disconnect", () => {
     const gameState = game.removePlayer(player);
     socket.broadcast.emit("message", `${player.name} has left the game.`);

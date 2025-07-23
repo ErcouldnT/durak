@@ -196,6 +196,13 @@
         </hand>
         <p class="text-center">Your hand</p>
       </div>
+      {#if yourTurn}
+        <button
+          on:click={() => socket.emit("endTurn", yourSocketId)}
+          class="cursor-pointer px-4 my-2 bg-orange-500 hover:bg-orange-600 text-white p-2 rounded-lg transition-all duration-300"
+          >END TURN</button
+        >
+      {/if}
     </div>
   {/if}
 

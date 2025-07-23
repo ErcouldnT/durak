@@ -41,11 +41,30 @@ class Durak {
     // console.log(`Player ${player.name} put ${card.name} on the table.`);
     // if (!player || !player.hand.includes(card)) return null;
     player.hand = player.hand.filter((c) => c.name !== card.name);
+
+    // check if the card can be put on the table
+    // if (this.tableCards.length === 0) {
+    //   this.tableCards.push(card);
+    //   return this.getGame();
+    // }
+
     this.tableCards.push(card);
+    return this.getGame();
+
+    // if table isn't empty - you can add card with any suit but with any value from the table
+
     // this.playedCards.push(card);
     // this.turn++;
     // this.currentPlayerId = this.findNextPlayer(playerId);
-    return this.getGame();
+  }
+
+  findNextPlayer(currentPlayerId) {
+    const playerIds = Array.from(this.players.keys());
+    const currentIndex = playerIds.indexOf(currentPlayerId);
+    const nextIndex = (currentIndex + 1) % playerIds.length;
+    this.turn++;
+    this.currentPlayerId = playerIds[nextIndex];
+    return playerIds[nextIndex];
   }
 
   createGameDeck() {
