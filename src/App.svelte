@@ -126,31 +126,47 @@
         <p class="text-center mb-2">Opponent hand</p>
         <hand class="flex space-x-5 space-y-2">
           {#each opponentHand as card}
-            <Card {card} />
+            <Card {card} isPlayable={false} />
           {/each}
         </hand>
       </div>
-      <div class="flex w-full flex-row justify-between items-center">
+      <div class="flex w-full flex-row justify-between items-center p-5">
         <div class="p-4 rounded-xl border-dotted border-4">
-          <div class="opacity-0">
-            <Card />
+          <div class="flex space-x-2 min-w-[120px] min-h-[180px]">
+            {#each game.playedCards as card}
+              <Card {card} isPlayable={false} />
+            {/each}
           </div>
+          <p class="text-center">Played cards</p>
+        </div>
+        <div class="p-4 rounded-xl border-dotted border-4">
+          <div class="flex space-x-2 w-[120px] h-[180px]">
+            {#each game.tableCards as card}
+              <Card {card} isPlayable={false} />
+            {/each}
+          </div>
+          <p class="text-center">Table cards</p>
         </div>
         <div>
           <div
             class="cursor-pointer flex space-x-4 relative w-[120px] h-[180px]"
           >
-            {#each game.deck as card, i}
+            <!-- {#each game.deck as card, i}
               <div
                 class="absolute top-0 left-0"
                 style="z-index: {i}; box-shadow: none;"
               >
                 <Card {card} />
               </div>
-            {/each}
-            <div class="absolute top-0 left-0 right-20 rotate-90">
-              <Card card={game.strongestCard} />
-              <!-- <Card card={game.deck[game.deck.length - 1]} /> -->
+            {/each} -->
+            <div class="absolute top-0 left-0 z-10">
+              <Card
+                card={game.deck[game.deck.length - 1]}
+                isPlayable={yourTurn}
+              />
+            </div>
+            <div class="absolute top-0 left-0 bottom-10 right-10 rotate-90">
+              <Card card={game.strongestCard} isPlayable={false} />
             </div>
           </div>
           <p class="text-xs text-center mt-2">Card count: {game.deck.length}</p>
