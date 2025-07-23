@@ -4,6 +4,8 @@ class Durak {
   constructor() {
     this.players = new Map();
     this.deck = [];
+    this.tableCards = [];
+    this.playedCards = [];
     this.turn = 0;
     this.state = "WAITING_FOR_PLAYERS";
     this.currentPlayerId = null;
@@ -17,6 +19,8 @@ class Durak {
       currentPlayerId: this.currentPlayerId,
       players: Array.from(this.players.values()),
       deck: this.deck,
+      tableCards: this.tableCards,
+      playedCards: this.playedCards,
       strongestCard: this.strongestCard,
     };
   }

@@ -1,5 +1,4 @@
 <script lang="ts">
-  import Card from "./Card.svelte";
   import { messages } from "../stores/messages";
 
   export let card = null;

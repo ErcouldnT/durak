@@ -9,19 +9,29 @@
   let nameInput: HTMLInputElement;
   let yourSocketId: string | undefined;
   let yourName = "";
+  let yourTurn = false;
   let yourHand = [];
+  let opponentHand = [];
   let game = {
     state: "WAITING_FOR_YOUR_NAME",
     turn: 0,
-    currentPlayerId: 0,
+    currentPlayerId: "0",
     players: [],
     deck: [],
     strongestCard: {},
+    tableCards: [],
+    playedCards: [],
   };
 
   $: yourHand = [
     ...(game.players.find((p: any) => p.id === yourSocketId)?.hand || []),
   ];
+
+  $: opponentHand = [
+    ...(game.players.find((p: any) => p.id !== yourSocketId)?.hand || []),
+  ];
+
+  $: yourTurn = game.currentPlayerId === yourSocketId;
 
   onMount(() => {
     // focus name input automatically when the page loads
@@ -115,16 +125,36 @@
       <div class="mb-5">
         <p class="text-center mb-2">Opponent hand</p>
         <hand class="flex space-x-5 space-y-2">
-          <Card />
-          <Card />
-          <Card />
-          <Card />
-          <Card />
-          <Card />
+          {#each opponentHand as card}
+            <Card {card} />
+          {/each}
         </hand>
       </div>
-      <div class="p-10">
-        <Card />
+      <div class="flex w-full flex-row justify-between items-center">
+        <div class="p-4 rounded-xl border-dotted border-4">
+          <div class="opacity-0">
+            <Card />
+          </div>
+        </div>
+        <div>
+          <div
+            class="cursor-pointer flex space-x-4 relative w-[120px] h-[180px]"
+          >
+            {#each game.deck as card, i}
+              <div
+                class="absolute top-0 left-0"
+                style="z-index: {i}; box-shadow: none;"
+              >
+                <Card {card} />
+              </div>
+            {/each}
+            <div class="absolute top-0 left-0 right-20 rotate-90">
+              <Card card={game.strongestCard} />
+              <!-- <Card card={game.deck[game.deck.length - 1]} /> -->
+            </div>
+          </div>
+          <p class="text-xs text-center mt-2">Card count: {game.deck.length}</p>
+        </div>
       </div>
       <div class="mt-5">
         <hand class="flex space-x-5 space-y-2">
