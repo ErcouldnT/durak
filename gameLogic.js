@@ -25,6 +25,17 @@ class Durak {
     };
   }
 
+  takeCardFromDeck(playerId) {
+    if (this.deck.length === 0) return null;
+    const card = this.deck.pop();
+    const player = this.players.get(playerId);
+    if (player) {
+      player.hand.push(card);
+      return this.getGame();
+    }
+    return null;
+  }
+
   createGameDeck() {
     // reset deck
     this.deck.length = 0;

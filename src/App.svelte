@@ -61,6 +61,12 @@
       game = gameState;
     });
   }
+
+  function getNewCard() {
+    if (!yourTurn || game.state !== "GAME_STARTED") return;
+    socket.emit("getNewCard", yourSocketId);
+    // $messages = [`You drew a new card.`, ...$messages];
+  }
 </script>
 
 <main
@@ -159,7 +165,7 @@
                 <Card {card} />
               </div>
             {/each} -->
-            <div class="absolute top-0 left-0 z-10">
+            <div on:click={getNewCard} class="absolute top-0 left-0 z-10">
               <Card
                 card={game.deck[game.deck.length - 1]}
                 isPlayable={yourTurn}

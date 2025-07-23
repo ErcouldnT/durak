@@ -7,7 +7,7 @@
 
   function onClick() {
     // todo: send card information to server
-    $messages = [`You clicked on ${card.name}.`, ...$messages];
+    // $messages = [`You clicked on ${card.name}.`, ...$messages];
   }
 </script>
 

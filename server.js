@@ -40,6 +40,18 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("message", msg);
   });
 
+  socket.on("getNewCard", (playerId) => {
+    if (game.state !== "GAME_STARTED" || game.currentPlayerId !== playerId)
+      return;
+    const gameState = game.takeCardFromDeck(playerId);
+    if (gameState) {
+      io.emit("gameState", gameState);
+      socket.emit("message", "You drew a new card.");
+    } else {
+      socket.emit("message", "You cannot draw a card right now.");
+    }
+  });
+
   socket.on("disconnect", () => {
     const gameState = game.removePlayer(player);
     socket.broadcast.emit("message", `${player.name} has left the game.`);
