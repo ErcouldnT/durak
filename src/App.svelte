@@ -81,6 +81,35 @@
     socket.emit("putCardOnTable", { playerId: yourSocketId, card });
     // $messages = [`You put ${card.name} on the table.`, ...$messages];
   }
+
+  let defendTimer = 30;
+  let timerInterval: any = null;
+  let previousTableCardsJSON = JSON.stringify([]);
+
+  // restart timer when tableCards change
+  $: {
+    const currentTableCardsJSON = JSON.stringify(game.tableCards);
+    if (
+      game.state === "GAME_STARTED" &&
+      game.tableCards.length > 0 &&
+      currentTableCardsJSON !== previousTableCardsJSON
+    ) {
+      previousTableCardsJSON = currentTableCardsJSON;
+      defendTimer = 30;
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        defendTimer--;
+        if (defendTimer <= 0) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+          if (game.state === "GAME_STARTED") {
+            socket.emit("endTurn", yourSocketId);
+            $messages = [`Time's up! This turn is over.`, ...$messages];
+          }
+        }
+      }, 1000);
+    }
+  }
 </script>
 
 <main
@@ -161,7 +190,9 @@
           </div>
           <p class="text-center">Played cards</p>
         </div>
-        <div class="p-6 rounded-xl border-dotted border-4">
+        <div
+          class="p-6 rounded-xl border-dotted border-4 flex flex-col justify-center items-center"
+        >
           <div class="flex space-x-6 min-w-[120px] min-h-[180px]">
             {#each game.tableCards as card}
               <div class="relative">
@@ -175,6 +206,23 @@
             {/each}
           </div>
           <p class="text-center">Round {game.turn}: Combat Field</p>
+
+          <div
+            class="w-60 h-3 bg-white/30 rounded overflow-hidden mt-2 relative"
+          >
+            <div
+              class="h-full transition-all duration-100 ease-linear"
+              style="width: {defendTimer *
+                (100 / 30)}%; background-color: {defendTimer <= 5
+                ? '#dc2626'
+                : '#f97316'}"
+            ></div>
+            <div
+              class="absolute top-0 left-0 w-full h-full flex items-center justify-center text-xs font-bold text-white"
+            >
+              {defendTimer} seconds
+            </div>
+          </div>
         </div>
         <div>
           <div
