@@ -24,13 +24,15 @@
     playedCards: [],
   };
 
-  $: yourHand = [
-    ...(game.players.find((p: any) => p.id === yourSocketId)?.hand || []),
-  ];
+  $: yourHand = Array.isArray(game.players)
+    ? game.players.find((player) => player.id === yourSocketId)?.hand || []
+    : [];
 
-  $: opponentHand = [
-    ...(game.players.find((p: any) => p.id !== yourSocketId)?.hand || []),
-  ];
+  $: opponentHand = Array.isArray(game.players)
+    ? game.players.find((player) => player.id !== yourSocketId)?.hand || []
+    : [];
+
+  // $: console.log(game.players);
 
   // $: yourTurn = game.currentPlayerId === yourSocketId;
 
@@ -69,17 +71,16 @@
     });
   }
 
-  function getNewCard() {
-    return null;
-    // if (!yourTurn || game.state !== "GAME_STARTED") return;
-    socket.emit("getNewCard", yourSocketId);
-    // $messages = [`You drew a new card.`, ...$messages];
-  }
-
   function putCardOnTable(card) {
     // if (!yourTurn || game.state !== "GAME_STARTED") return;
     socket.emit("putCardOnTable", { playerId: yourSocketId, card });
     // $messages = [`You put ${card.name} on the table.`, ...$messages];
+  }
+
+  function endTurn() {
+    // if (!yourTurn || game.state !== "GAME_STARTED") return;
+    socket.emit("endTurn");
+    // $messages = [`You ended your turn.`, ...$messages];
   }
 
   let defendTimer = 30;
@@ -87,29 +88,28 @@
   let previousTableCardsJSON = JSON.stringify([]);
 
   // restart timer when tableCards change
-  $: {
-    const currentTableCardsJSON = JSON.stringify(game.tableCards);
-    if (
-      game.state === "GAME_STARTED" &&
-      game.tableCards.length > 0 &&
-      currentTableCardsJSON !== previousTableCardsJSON
-    ) {
-      previousTableCardsJSON = currentTableCardsJSON;
-      defendTimer = 30;
-      clearInterval(timerInterval);
-      timerInterval = setInterval(() => {
-        defendTimer--;
-        if (defendTimer <= 0) {
-          clearInterval(timerInterval);
-          timerInterval = null;
-          if (game.state === "GAME_STARTED") {
-            socket.emit("endTurn");
-            $messages = [`Time's up! This turn is over.`, ...$messages];
-          }
-        }
-      }, 1000);
-    }
-  }
+  // $: {
+  //   const currentTableCardsJSON = JSON.stringify(game.tableCards);
+  //   if (
+  //     game.state === "GAME_STARTED" &&
+  //     game.tableCards.length > 0 &&
+  //     currentTableCardsJSON !== previousTableCardsJSON
+  //   ) {
+  //     previousTableCardsJSON = currentTableCardsJSON;
+  //     defendTimer = 30;
+  //     clearInterval(timerInterval);
+  //     timerInterval = setInterval(() => {
+  //       defendTimer--;
+  //       if (defendTimer === 0) {
+  //         clearInterval(timerInterval);
+  //         timerInterval = null;
+  //         socket.emit("endTurn");
+  //         $messages = [`Time's up! This turn is over.`, ...$messages];
+  //         defendTimer = 30; // reset timer for the next turn
+  //       }
+  //     }, 1000);
+  //   }
+  // }
 </script>
 
 <main
@@ -226,6 +226,11 @@
               {defendTimer} seconds
             </div>
           </div>
+          <button
+            on:click={endTurn}
+            class="cursor-pointer px-2 mt-2 bg-black text-white"
+            >END TURN TEST</button
+          >
         </div>
         <div>
           <div
@@ -239,7 +244,7 @@
                 <Card {card} />
               </div>
             {/each} -->
-            <button on:click={getNewCard} class="absolute top-0 left-0 z-10">
+            <button class="absolute top-0 left-0 z-10">
               <Card
                 card={game.deck[game.deck.length - 1]}
                 isPlayable={false}

@@ -28,16 +28,16 @@ class Durak {
     };
   }
 
-  takeCardFromDeck(playerId) {
-    if (this.deck.length === 0) return null;
-    const card = this.deck.pop();
-    const player = this.players.get(playerId);
-    if (player) {
-      player.hand.push(card);
-      return this.getGame();
-    }
-    return null;
-  }
+  // takeCardFromDeck(playerId) {
+  //   if (this.deck.length === 0) return null;
+  //   const card = this.deck.pop();
+  //   const player = this.players.get(playerId);
+  //   if (player) {
+  //     player.hand.push(card);
+  //     return this.getGame();
+  //   }
+  //   return null;
+  // }
 
   putCardOnTable(playerId, card) {
     const player = this.players.get(playerId);
@@ -104,13 +104,19 @@ class Durak {
     return this.getGame();
   }
 
-  // fix this shit later
   findNextAttacker() {
     const playerIds = Array.from(this.players.keys());
     const currentIndex = playerIds.indexOf(this.attackerId);
-    const nextIndex = (currentIndex + 1) % playerIds.length;
-    // this.turn++;
-    return (this.attackerId = playerIds[nextIndex]);
+
+    if (currentIndex === -1) {
+      // fallback to first player
+      this.attackerId = playerIds[0];
+    } else {
+      const nextIndex = (currentIndex + 1) % playerIds.length;
+      this.attackerId = playerIds[nextIndex];
+    }
+
+    return this.attackerId;
   }
 
   endTurn() {
@@ -232,6 +238,9 @@ class Durak {
   addPlayer(player) {
     // max 2 players allowed
     if (this.players.size >= Durak.MAX_PLAYERS) return;
+
+    player.hand = []; // initialize player's hand
+    player.isReady = false; // initialize player's readiness
 
     // add to players
     this.players.set(player.id, player);
