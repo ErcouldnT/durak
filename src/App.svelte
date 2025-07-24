@@ -35,9 +35,9 @@
   // $: yourTurn = game.currentPlayerId === yourSocketId;
 
   // $: if (game.attackerId === yourSocketId && game.state === "GAME_STARTED") {
-  //   if (!$messages.includes("You are the attacker.")) {
-  //     $messages = [`You are the attacker.`, ...$messages];
-  //   }
+  //   $messages = [`You are the attacker.`, ...$messages];
+  // } else {
+  //   $messages = [`You are the defender.`, ...$messages];
   // }
 
   onMount(() => {
@@ -174,7 +174,7 @@
               </div>
             {/each}
           </div>
-          <p class="text-center">Table cards</p>
+          <p class="text-center">Round {game.turn}: Combat Field</p>
         </div>
         <div>
           <div
@@ -189,7 +189,11 @@
               </div>
             {/each} -->
             <button on:click={getNewCard} class="absolute top-0 left-0 z-10">
-              <Card card={game.deck[game.deck.length - 1]} isPlayable={false} />
+              <Card
+                card={game.deck[game.deck.length - 1]}
+                isPlayable={false}
+                backSide={true}
+              />
             </button>
             <div class="absolute top-0 left-10 rotate-90">
               <Card card={game.strongestCard} isPlayable={false} />
@@ -208,13 +212,12 @@
         </hand>
         <p class="text-center">Your hand</p>
       </div>
-      <!-- {#if yourTurn}
-        <button
-          on:click={() => socket.emit("endTurn", yourSocketId)}
-          class="cursor-pointer px-4 my-2 bg-orange-500 hover:bg-orange-600 text-white p-2 rounded-lg transition-all duration-300"
-          >END TURN</button
-        >
-      {/if} -->
+
+      <div
+        class="cursor-pointer px-4 my-2 bg-orange-500 hover:bg-orange-600 text-white p-2 rounded-lg transition-all duration-300"
+      >
+        {game.attackerId === yourSocketId ? "ATTACK" : "DEFEND"}
+      </div>
     </div>
   {/if}
 
