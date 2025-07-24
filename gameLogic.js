@@ -53,7 +53,9 @@ class Durak {
         const isKoz = card.suit === this.strongestCard.suit;
         const isSameSuit = card.suit === tableCard.suit;
 
-        const canDefend = (isSameSuit && card.value > tableCard.value) || isKoz;
+        const canDefend =
+          (isSameSuit && card.value > tableCard.value) ||
+          (isKoz && card.value > tableCard.value);
 
         if (canDefend) {
           tableCard.defendedWith = card;
@@ -65,9 +67,31 @@ class Durak {
       return null; // no valid tableCard to defend
     }
 
-    // Attacker's move — can play any card
+    // Attacker's move
+    const defenderId = Array.from(this.players.keys()).find(
+      (id) => id !== this.attackerId
+    );
+    const defender = this.players.get(defenderId);
+    const attackCount = this.tableCards.length;
+    const maxAllowed = Math.min(6, defender.hand.length);
+
+    // Prevent too many attacks
+    if (attackCount >= maxAllowed) return null;
+
+    // Allow first card or any card whose label matches an existing label
+    if (
+      attackCount > 0 &&
+      !this.tableCards.some(
+        (tableCard) =>
+          tableCard.label === card.label ||
+          (tableCard.defendedWith &&
+            tableCard.defendedWith.label === card.label)
+      )
+    ) {
+      return null;
+    }
+
     this.tableCards.push({ ...card, defendedWith: null });
-    // Remove card from hand
     player.hand = player.hand.filter((c) => c.name !== card.name);
     return this.getGame();
   }
