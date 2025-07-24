@@ -45,27 +45,24 @@ class Durak {
     const cardInHand = player.hand.find((c) => c.name === card.name);
     if (!cardInHand) return null;
 
-    const lastTableCard = this.tableCards[this.tableCards.length - 1];
-
     if (this.attackerId !== playerId) {
       // Defender's move
-      if (!lastTableCard) return null;
+      for (const tableCard of this.tableCards) {
+        if (tableCard.defendedWith) continue;
 
-      // If the last table card has already been defended, cannot defend again
-      if (lastTableCard.defendedWith) return null;
+        const isKoz = card.suit === this.strongestCard.suit;
+        const isSameSuit = card.suit === tableCard.suit;
 
-      const isKoz = card.suit === this.strongestCard.suit;
-      const isSameSuit = card.suit === lastTableCard.suit;
+        const canDefend = (isSameSuit && card.value > tableCard.value) || isKoz;
 
-      const canDefend =
-        (isSameSuit && card.value > lastTableCard.value) || isKoz;
+        if (canDefend) {
+          tableCard.defendedWith = card;
+          player.hand = player.hand.filter((c) => c.name !== card.name);
+          return this.getGame();
+        }
+      }
 
-      if (!canDefend) return null;
-
-      lastTableCard.defendedWith = card;
-      // Remove card from hand
-      player.hand = player.hand.filter((c) => c.name !== card.name);
-      return this.getGame();
+      return null; // no valid tableCard to defend
     }
 
     // Attacker's move — can play any card

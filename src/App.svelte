@@ -154,8 +154,8 @@
           </div>
           <p class="text-center">Played cards</p>
         </div>
-        <div class="p-4 rounded-xl border-dotted border-4">
-          <div class="flex space-x-4 min-w-[120px] min-h-[180px]">
+        <div class="p-6 rounded-xl border-dotted border-4">
+          <div class="flex space-x-6 min-w-[120px] min-h-[180px]">
             {#each game.tableCards as card}
               <div class="relative">
                 <Card {card} isPlayable={false} />
