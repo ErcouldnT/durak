@@ -51,12 +51,19 @@ class Durak {
       for (const tableCard of this.tableCards) {
         if (tableCard.defendedWith) continue;
 
-        const isKoz = card.suit === this.strongestCard.suit;
         const isSameSuit = card.suit === tableCard.suit;
+        const isCardStrongestSuit = card.suit === this.strongestCard.suit;
+        const isTableCardStrongestSuit =
+          tableCard.suit === this.strongestCard.suit;
 
-        const canDefend =
-          (isSameSuit && card.value > tableCard.value) ||
-          (isKoz && card.value > tableCard.value);
+        let canDefend = false;
+
+        if (isTableCardStrongestSuit) {
+          canDefend = isCardStrongestSuit && card.value > tableCard.value;
+        } else {
+          canDefend =
+            (isSameSuit && card.value > tableCard.value) || isCardStrongestSuit;
+        }
 
         if (canDefend) {
           tableCard.defendedWith = card;

@@ -69,9 +69,9 @@ io.on("connection", (socket) => {
     //   return;
     const gameState = game.endTurn();
     io.emit("gameState", gameState);
-    if (gameState.turn) {
-      io.emit("message", `Round ${gameState.turn} is starting.`);
-    }
+    // if (gameState.turn) {
+    //   io.emit("message", `Round ${gameState.turn} is starting.`);
+    // }
   });
 
   socket.on("disconnect", () => {
