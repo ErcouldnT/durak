@@ -81,7 +81,7 @@ class Durak {
     );
     const defender = this.players.get(defenderId);
     const attackCount = this.tableCards.length;
-    const maxAllowed = Math.min(12, defender.hand.length * 2);
+    const maxAllowed = Math.min(6, defender.hand.length);
 
     // Prevent too many attacks
     if (attackCount >= maxAllowed) return null;
