@@ -64,16 +64,15 @@ io.on("connection", (socket) => {
     }
   });
 
-  // socket.on("endTurn", (playerId) => {
-  //   if (game.state !== "GAME_STARTED" || game.currentPlayerId !== playerId)
-  //     return;
-  //   const nextPlayerId = game.findNextPlayer(playerId);
-  //   io.emit("gameState", game.getGame());
-  //   socket.emit(
-  //     "message",
-  //     `You ended your turn. It's now ${nextPlayerId}'s turn.`
-  //   );
-  // });
+  socket.on("endTurn", () => {
+    // if (game.state !== "GAME_STARTED" || game.currentPlayerId !== playerId)
+    //   return;
+    const gameState = game.endTurn();
+    io.emit("gameState", gameState);
+    if (gameState.turn) {
+      io.emit("message", `Round ${gameState.turn} is starting.`);
+    }
+  });
 
   socket.on("disconnect", () => {
     const gameState = game.removePlayer(player);

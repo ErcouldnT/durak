@@ -9,7 +9,7 @@
   let nameInput: HTMLInputElement;
   let yourSocketId: string | undefined;
   let yourName = "";
-  let yourTurn = true;
+  // let yourTurn = true;
   let yourHand = [];
   let opponentHand = [];
   let game = {
@@ -103,7 +103,7 @@
           clearInterval(timerInterval);
           timerInterval = null;
           if (game.state === "GAME_STARTED") {
-            socket.emit("endTurn", yourSocketId);
+            socket.emit("endTurn");
             $messages = [`Time's up! This turn is over.`, ...$messages];
           }
         }
@@ -182,13 +182,16 @@
       <div
         class="flex w-full space-x-4 flex-row justify-between items-center p-5"
       >
-        <div class="p-4 rounded-xl border-dotted border-4">
+        <div class="p-4 rounded-xl">
           <div class="flex space-x-2 min-w-[120px] min-h-[180px]">
-            {#each game.playedCards as card}
+            <!-- {#each game.playedCards as card}
               <Card {card} isPlayable={false} />
-            {/each}
+            {/each} -->
+            {#if game.playedCards.length > 0}
+              <Card />
+            {/if}
           </div>
-          <p class="text-center">Played cards</p>
+          <p class="text-center">Dead cards: {game.playedCards.length}</p>
         </div>
         <div
           class="p-6 rounded-xl border-dotted border-4 flex flex-col justify-center items-center"

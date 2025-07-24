@@ -7,6 +7,7 @@ class Durak {
     this.tableCards = [];
     this.playedCards = [];
     this.turn = 0;
+    this.timer = 30; // 30 seconds for each card play
     this.state = "WAITING_FOR_PLAYERS";
     // this.currentPlayerId = null;
     this.attackerId = null;
@@ -96,13 +97,57 @@ class Durak {
     return this.getGame();
   }
 
-  findNextPlayer(currentPlayerId) {
+  // fix this shit later
+  findNextAttacker(attackerId) {
     const playerIds = Array.from(this.players.keys());
-    const currentIndex = playerIds.indexOf(currentPlayerId);
+    const currentIndex = playerIds.indexOf(attackerId);
     const nextIndex = (currentIndex + 1) % playerIds.length;
     // this.turn++;
-    this.attackerId = playerIds[nextIndex];
-    return playerIds[nextIndex];
+    return (this.attackerId = playerIds[nextIndex]);
+  }
+
+  endTurn() {
+    if (this.tableCards.length === 0) return;
+
+    this.turn++;
+
+    const attacker = this.players.get(this.attackerId);
+    const defenderId = Array.from(this.players.keys()).find(
+      (id) => id !== this.attackerId
+    );
+    const defender = this.players.get(defenderId);
+
+    const allDefended = this.tableCards.every(
+      (tableCard) => tableCard.defendedWith
+    );
+
+    if (allDefended) {
+      for (const tableCard of this.tableCards) {
+        this.playedCards.push(tableCard);
+        if (tableCard.defendedWith) {
+          this.playedCards.push(tableCard.defendedWith);
+        }
+      }
+    } else {
+      for (const tableCard of this.tableCards) {
+        defender.hand.push(tableCard);
+        if (tableCard.defendedWith) {
+          defender.hand.push(tableCard.defendedWith);
+        }
+      }
+    }
+
+    this.tableCards = [];
+
+    for (const player of [attacker, defender]) {
+      while (player.hand.length < 6 && this.deck.length > 0) {
+        player.hand.push(this.deck.pop());
+      }
+    }
+
+    this.findNextAttacker(this.attackerId);
+
+    return this.getGame();
   }
 
   createGameDeck() {
