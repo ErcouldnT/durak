@@ -41,8 +41,8 @@ io.on("connection", (socket) => {
   });
 
   socket.on("getNewCard", (playerId) => {
-    if (game.state !== "GAME_STARTED" || game.currentPlayerId !== playerId)
-      return;
+    // if (game.state !== "GAME_STARTED" || game.currentPlayerId !== playerId)
+    //   return;
     const gameState = game.takeCardFromDeck(playerId);
     if (gameState) {
       io.emit("gameState", gameState);
@@ -53,8 +53,8 @@ io.on("connection", (socket) => {
   });
 
   socket.on("putCardOnTable", ({ playerId, card }) => {
-    if (game.state !== "GAME_STARTED" || game.currentPlayerId !== playerId)
-      return;
+    // if (game.state !== "GAME_STARTED" || game.currentPlayerId !== playerId)
+    //   return;
     const gameState = game.putCardOnTable(playerId, card);
     if (gameState) {
       io.emit("gameState", gameState);
@@ -64,16 +64,16 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("endTurn", (playerId) => {
-    if (game.state !== "GAME_STARTED" || game.currentPlayerId !== playerId)
-      return;
-    const nextPlayerId = game.findNextPlayer(playerId);
-    io.emit("gameState", game.getGame());
-    socket.emit(
-      "message",
-      `You ended your turn. It's now ${nextPlayerId}'s turn.`
-    );
-  });
+  // socket.on("endTurn", (playerId) => {
+  //   if (game.state !== "GAME_STARTED" || game.currentPlayerId !== playerId)
+  //     return;
+  //   const nextPlayerId = game.findNextPlayer(playerId);
+  //   io.emit("gameState", game.getGame());
+  //   socket.emit(
+  //     "message",
+  //     `You ended your turn. It's now ${nextPlayerId}'s turn.`
+  //   );
+  // });
 
   socket.on("disconnect", () => {
     const gameState = game.removePlayer(player);

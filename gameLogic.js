@@ -8,7 +8,7 @@ class Durak {
     this.playedCards = [];
     this.turn = 0;
     this.state = "WAITING_FOR_PLAYERS";
-    this.currentPlayerId = null;
+    // this.currentPlayerId = null;
     this.attackerId = null;
     this.strongestCard = null;
   }
@@ -17,7 +17,7 @@ class Durak {
     return {
       turn: this.turn,
       state: this.state,
-      currentPlayerId: this.currentPlayerId,
+      // currentPlayerId: this.currentPlayerId,
       attackerId: this.attackerId,
       players: Array.from(this.players.values()),
       deck: this.deck,
@@ -101,7 +101,7 @@ class Durak {
     const currentIndex = playerIds.indexOf(currentPlayerId);
     const nextIndex = (currentIndex + 1) % playerIds.length;
     // this.turn++;
-    this.currentPlayerId = playerIds[nextIndex];
+    this.attackerId = playerIds[nextIndex];
     return playerIds[nextIndex];
   }
 
@@ -214,8 +214,8 @@ class Durak {
     this.createGameDeck();
     this.giveSixCardsToPlayers();
     this.strongestCard = this.deck[0]; // choose the first card as the strongest card (:
-    this.currentPlayerId = this.findFirstPlayer(this.strongestCard).id;
-    this.attackerId = this.currentPlayerId; // set the first player as the attacker
+    // this.currentPlayerId = this.findFirstPlayer(this.strongestCard).id;
+    this.attackerId = this.findFirstPlayer(this.strongestCard).id; // set the first player as the attacker
     this.state = "GAME_STARTED";
     this.turn = 1;
     this.tableCards = [];
@@ -228,7 +228,7 @@ class Durak {
     // reset game state
     this.state = "WAITING_FOR_PLAYERS";
     this.turn = 0;
-    this.currentPlayerId = null;
+    // this.currentPlayerId = null;
     this.attackerId = null;
     this.strongestCard = null;
 

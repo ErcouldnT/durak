@@ -9,13 +9,13 @@
   let nameInput: HTMLInputElement;
   let yourSocketId: string | undefined;
   let yourName = "";
-  let yourTurn = false;
+  let yourTurn = true;
   let yourHand = [];
   let opponentHand = [];
   let game = {
     state: "WAITING_FOR_YOUR_NAME",
     turn: 0,
-    currentPlayerId: "0",
+    // currentPlayerId: "0",
     attackerId: "0",
     players: [],
     deck: [],
@@ -32,7 +32,13 @@
     ...(game.players.find((p: any) => p.id !== yourSocketId)?.hand || []),
   ];
 
-  $: yourTurn = game.currentPlayerId === yourSocketId;
+  // $: yourTurn = game.currentPlayerId === yourSocketId;
+
+  // $: if (game.attackerId === yourSocketId && game.state === "GAME_STARTED") {
+  //   if (!$messages.includes("You are the attacker.")) {
+  //     $messages = [`You are the attacker.`, ...$messages];
+  //   }
+  // }
 
   onMount(() => {
     // focus name input automatically when the page loads
@@ -64,13 +70,14 @@
   }
 
   function getNewCard() {
-    if (!yourTurn || game.state !== "GAME_STARTED") return;
+    return null;
+    // if (!yourTurn || game.state !== "GAME_STARTED") return;
     socket.emit("getNewCard", yourSocketId);
     // $messages = [`You drew a new card.`, ...$messages];
   }
 
   function putCardOnTable(card) {
-    if (!yourTurn || game.state !== "GAME_STARTED") return;
+    // if (!yourTurn || game.state !== "GAME_STARTED") return;
     socket.emit("putCardOnTable", { playerId: yourSocketId, card });
     // $messages = [`You put ${card.name} on the table.`, ...$messages];
   }
@@ -182,10 +189,7 @@
               </div>
             {/each} -->
             <button on:click={getNewCard} class="absolute top-0 left-0 z-10">
-              <Card
-                card={game.deck[game.deck.length - 1]}
-                isPlayable={yourTurn}
-              />
+              <Card card={game.deck[game.deck.length - 1]} isPlayable={false} />
             </button>
             <div class="absolute top-0 left-10 rotate-90">
               <Card card={game.strongestCard} isPlayable={false} />
@@ -204,13 +208,13 @@
         </hand>
         <p class="text-center">Your hand</p>
       </div>
-      {#if yourTurn}
+      <!-- {#if yourTurn}
         <button
           on:click={() => socket.emit("endTurn", yourSocketId)}
           class="cursor-pointer px-4 my-2 bg-orange-500 hover:bg-orange-600 text-white p-2 rounded-lg transition-all duration-300"
           >END TURN</button
         >
-      {/if}
+      {/if} -->
     </div>
   {/if}
 
