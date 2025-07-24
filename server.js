@@ -53,9 +53,6 @@ io.on("connection", (socket) => {
   });
 
   socket.on("putCardOnTable", ({ playerId, card }) => {
-    // console.log(
-    //   `Player ${playerId} is putting card ${card.name} on the table.`
-    // );
     if (game.state !== "GAME_STARTED" || game.currentPlayerId !== playerId)
       return;
     const gameState = game.putCardOnTable(playerId, card);

@@ -9,6 +9,7 @@ class Durak {
     this.turn = 0;
     this.state = "WAITING_FOR_PLAYERS";
     this.currentPlayerId = null;
+    this.attackerId = null;
     this.strongestCard = null;
   }
 
@@ -17,6 +18,7 @@ class Durak {
       turn: this.turn,
       state: this.state,
       currentPlayerId: this.currentPlayerId,
+      attackerId: this.attackerId,
       players: Array.from(this.players.values()),
       deck: this.deck,
       tableCards: this.tableCards,
@@ -38,31 +40,46 @@ class Durak {
 
   putCardOnTable(playerId, card) {
     const player = this.players.get(playerId);
-    // console.log(`Player ${player.name} put ${card.name} on the table.`);
-    // if (!player || !player.hand.includes(card)) return null;
+    if (!player) return null;
+
+    const cardInHand = player.hand.find((c) => c.name === card.name);
+    if (!cardInHand) return null;
+
+    const lastTableCard = this.tableCards[this.tableCards.length - 1];
+
+    if (this.attackerId !== playerId) {
+      // Defender's move
+      if (!lastTableCard) return null;
+
+      // If the last table card has already been defended, cannot defend again
+      if (lastTableCard.defendedWith) return null;
+
+      const isKoz = card.suit === this.strongestCard.suit;
+      const isSameSuit = card.suit === lastTableCard.suit;
+
+      const canDefend =
+        (isSameSuit && card.value > lastTableCard.value) || isKoz;
+
+      if (!canDefend) return null;
+
+      lastTableCard.defendedWith = card;
+      // Remove card from hand
+      player.hand = player.hand.filter((c) => c.name !== card.name);
+      return this.getGame();
+    }
+
+    // Attacker's move — can play any card
+    this.tableCards.push({ ...card, defendedWith: null });
+    // Remove card from hand
     player.hand = player.hand.filter((c) => c.name !== card.name);
-
-    // check if the card can be put on the table
-    // if (this.tableCards.length === 0) {
-    //   this.tableCards.push(card);
-    //   return this.getGame();
-    // }
-
-    this.tableCards.push(card);
     return this.getGame();
-
-    // if table isn't empty - you can add card with any suit but with any value from the table
-
-    // this.playedCards.push(card);
-    // this.turn++;
-    // this.currentPlayerId = this.findNextPlayer(playerId);
   }
 
   findNextPlayer(currentPlayerId) {
     const playerIds = Array.from(this.players.keys());
     const currentIndex = playerIds.indexOf(currentPlayerId);
     const nextIndex = (currentIndex + 1) % playerIds.length;
-    this.turn++;
+    // this.turn++;
     this.currentPlayerId = playerIds[nextIndex];
     return playerIds[nextIndex];
   }
@@ -177,6 +194,7 @@ class Durak {
     this.giveSixCardsToPlayers();
     this.strongestCard = this.deck[0]; // choose the first card as the strongest card (:
     this.currentPlayerId = this.findFirstPlayer(this.strongestCard).id;
+    this.attackerId = this.currentPlayerId; // set the first player as the attacker
     this.state = "GAME_STARTED";
     this.turn = 1;
     this.tableCards = [];
@@ -190,6 +208,7 @@ class Durak {
     this.state = "WAITING_FOR_PLAYERS";
     this.turn = 0;
     this.currentPlayerId = null;
+    this.attackerId = null;
     this.strongestCard = null;
 
     // reset players' hands

@@ -16,6 +16,7 @@
     state: "WAITING_FOR_YOUR_NAME",
     turn: 0,
     currentPlayerId: "0",
+    attackerId: "0",
     players: [],
     deck: [],
     strongestCard: {},
@@ -154,9 +155,16 @@
           <p class="text-center">Played cards</p>
         </div>
         <div class="p-4 rounded-xl border-dotted border-4">
-          <div class="flex space-x-2 min-w-[120px] min-h-[180px]">
+          <div class="flex space-x-4 min-w-[120px] min-h-[180px]">
             {#each game.tableCards as card}
-              <Card {card} isPlayable={false} />
+              <div class="relative">
+                <Card {card} isPlayable={false} />
+                <div class="z-50 absolute -top-5 -left-5">
+                  {#if card.defendedWith}
+                    <Card card={card.defendedWith} isPlayable={false} />
+                  {/if}
+                </div>
+              </div>
             {/each}
           </div>
           <p class="text-center">Table cards</p>
