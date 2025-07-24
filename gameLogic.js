@@ -105,9 +105,9 @@ class Durak {
   }
 
   // fix this shit later
-  findNextAttacker(attackerId) {
+  findNextAttacker() {
     const playerIds = Array.from(this.players.keys());
-    const currentIndex = playerIds.indexOf(attackerId);
+    const currentIndex = playerIds.indexOf(this.attackerId);
     const nextIndex = (currentIndex + 1) % playerIds.length;
     // this.turn++;
     return (this.attackerId = playerIds[nextIndex]);
@@ -135,6 +135,8 @@ class Durak {
           this.playedCards.push(tableCard.defendedWith);
         }
       }
+      // attacker is changed
+      this.findNextAttacker();
     } else {
       for (const tableCard of this.tableCards) {
         defender.hand.push(tableCard);
@@ -151,8 +153,6 @@ class Durak {
         player.hand.push(this.deck.pop());
       }
     }
-
-    this.findNextAttacker(this.attackerId);
 
     return this.getGame();
   }
