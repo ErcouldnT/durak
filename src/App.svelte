@@ -175,7 +175,7 @@
         <p class="text-center mb-2">Opponent hand</p>
         <hand class="flex space-x-5 space-y-2">
           {#each opponentHand as card}
-            <Card {card} isPlayable={false} />
+            <Card {card} isPlayable={false} backSide={true} />
           {/each}
         </hand>
       </div>
@@ -244,16 +244,20 @@
                 <Card {card} />
               </div>
             {/each} -->
-            <button class="absolute top-0 left-0 z-10">
-              <Card
-                card={game.deck[game.deck.length - 1]}
-                isPlayable={false}
-                backSide={true}
-              />
-            </button>
-            <div class="absolute top-0 left-10 rotate-90">
-              <Card card={game.strongestCard} isPlayable={false} />
+            <div class="absolute top-0 left-0 z-10">
+              {#if game.deck.length > 1}
+                <Card
+                  card={game.deck[game.deck.length - 1]}
+                  isPlayable={false}
+                  backSide={true}
+                />
+              {/if}
             </div>
+            {#if game.deck.length > 0}
+              <div class="absolute top-0 left-10 rotate-90">
+                <Card card={game.strongestCard} isPlayable={false} />
+              </div>
+            {/if}
           </div>
           <p class="text-xs text-center mt-2">Card count: {game.deck.length}</p>
         </div>
